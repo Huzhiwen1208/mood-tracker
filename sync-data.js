@@ -20,7 +20,7 @@ function decode(str, key) {
 
 const DATA_FILE = path.join(__dirname, 'data', 'moods.json');
 const LOG_FILE = path.join(__dirname, 'data', 'actions.log');
-const PASSWORD = process.env.MOOD_PASSWORD || 'demo-secret-key-change-me';
+const PASSWORD = process.env.MOOD_PASSWORD || 'test_123_for_mood';
 
 function ensureDir(p) {
   const dir = path.dirname(p);
