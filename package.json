@@ -1,0 +1,13 @@
+{
+  "name": "mood-tracker",
+  "version": "1.0.0",
+  "description": "个人心情记录网站，托管在GitHub Pages",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve . -p 8080"
+  },
+  "keywords": ["mood", "github-pages"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {}
+}

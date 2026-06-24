@@ -1,0 +1,54 @@
+name: Sync Mood Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        type: choice
+        description: "操作类型"
+        required: true
+        options:
+          - send
+          - undo
+      text:
+        type: string
+        description: "心情内容（send操作时必填）"
+        required: false
+      tag:
+        type: choice
+        description: "心情标签（send操作时使用）"
+        required: false
+        options:
+          - 😊
+          - 😌
+          - 😢
+          - 😤
+          - 🤔
+          - 🥳
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync mood data
+        env:
+          MOOD_ACTION: ${{ inputs.action }}
+          MOOD_TEXT: ${{ inputs.text }}
+          MOOD_TAG: ${{ inputs.tag }}
+          MOOD_PASSWORD: ${{ secrets.MOOD_PASSWORD }}
+        run: |
+          node sync-data.js $MOOD_ACTION
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "sync: $MOOD_ACTION mood data" && git push)

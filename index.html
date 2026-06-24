@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的心情记录</title>
+  <style>
+    :root {
+      --bg: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      --panel: rgba(255,255,255,0.9);
+      --border: rgba(200,200,200,0.3);
+      --primary: #6c5ce7;
+      --primary-soft: rgba(108,92,231,0.1);
+      --text: #2d3436;
+      --muted: #636e72;
+      --shadow: 0 12px 24px rgba(0,0,0,0.06);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .input-area { display: flex; gap: 10px; flex-direction: column; }
+    .input-row {
+      display: flex; gap: 8px; align-items: flex-end;
+    }
+    textarea {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 72px;
+      outline: none;
+      transition: border-color .2s;
+      background: #fff;
+    }
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      user-select: none;
+      transition: transform .1s, background .2s, border-color .2s;
+    }
+    .tag:hover { transform: translateY(-1px); }
+    .tag.selected {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .1s, background .2s, opacity .2s;
+      min-width: 80px;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-send {
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      color: #fff;
+    }
+    .btn-undo {
+      background: #fff;
+      color: #d63031;
+      border: 1px solid rgba(214,48,49,0.3);
+    }
+    .status {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    .status.ok { color: #00b894; }
+    .status.warn { color: #fdcb6e; }
+    .status.err { color: #d63031; }
+    .timeline { display: flex; flex-direction: column; gap: 12px; }
+    .mood-item {
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      margin-top: 6px; flex-shrink: 0;
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    .content { flex: 1; }
+    .content .meta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .content .time {
+      color: var(--muted); font-size: 0.82rem;
+    }
+    .content .tag-badge {
+      font-size: 0.78rem; padding: 3px 8px; border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    .content .text {
+      margin: 0; white-space: pre-wrap; word-break: break-word;
+    }
+    .empty {
+      text-align: center; color: var(--muted); padding: 24px;
+    }
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 20px; }
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #fff; border-radius: 18px; padding: 22px; max-width: 420px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      transform: translateY(12px) scale(0.98); transition: transform .2s;
+    }
+    .modal-backdrop.open .modal { transform: none; }
+    .modal h3 { margin: 0 0 8px; }
+    .modal p { margin: 0 0 16px; color: var(--muted); }
+    .modal .row { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel { background: #f1f2f6; color: var(--text); }
+    .btn-danger { background: #d63031; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>我的心情记录</h1>
+      <p>记录当下，留住每一天的小确幸</p>
+    </header>
+
+    <section class="panel">
+      <div class="input-area">
+        <div class="tags" id="tags">
+          <span class="tag" data-value="😊">😊 开心</span>
+          <span class="tag" data-value="😌">😌 平静</span>
+          <span class="tag" data-value="😢">😢 难过</span>
+          <span class="tag" data-value="😤">😤 烦躁</span>
+          <span class="tag" data-value="🤔">🤔 思考</span>
+          <span class="tag" data-value="🥳">🥳 庆祝</span>
+        </div>
+        <textarea id="input" placeholder="写下今天的心情..."></textarea>
+        <div class="btn-row">
+          <button class="btn-undo" id="undo">撤销</button>
+          <button class="btn-send" id="send">发送</button>
+        </div>
+        <div class="status" id="status"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="timeline" id="timeline">
+        <div class="empty">暂无心情记录</div>
+      </div>
+    </section>
+
+    <footer>
+      Powered by GitHub Pages & GitHub Issues
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <h3>确认撤销？</h3>
+      <p id="modalText">确定要删除最新一条心情记录吗？</p>
+      <div class="row">
+        <button class="btn-cancel" id="modalCancel">取消</button>
+        <button class="btn-danger" id="modalOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============ 配置 ============
+    const CONFIG = {
+      // 请在部署后替换为你的仓库信息
+      repo: 'user/repo',
+      // 加密密码（建议在部署后通过环境变量或URL参数传入，此处仅作示例）
+      password: 'demo-secret-key-change-me',
+    };
+
+    // ============ 简单加密（XOR + Base64） ============
+    function xor(str, key) {
+      let res = [];
+      for (let i = 0; i < str.length; i++) {
+        res.push(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return String.fromCharCode.apply(null, res);
+    }
+    function encode(data, key) {
+      return btoa(unescape(encodeURIComponent(xor(JSON.stringify(data), key))));
+    }
+    function decode(str, key) {
+      try {
+        return JSON.parse(xor(decodeURIComponent(escape(atob(str))), key));
+      } catch { return []; }
+    }
+
+    // ============ 状态与数据 ============
+    let moods = [];
+    let selectedTag = '😊';
+    let sending = false;
+    let lastStatusTimeout;
+
+    // DOM
+    const $ = id => document.getElementById(id);
+    const elInput = $('input');
+    const elTags = $('tags');
+    const elSend = $('send');
+    const elUndo = $('undo');
+    const elStatus = $('status');
+    const elTimeline = $('timeline');
+    const elModal = $('modal');
+    const elModalCancel = $('modalCancel');
+    const elModalOk = $('modalOk');
+
+    // ============ 加载与存储 ============
+    let usingRemote = false;
+    async function loadFromRemote() {
+      try {
+        const res = await fetch('data/moods.json?t=' + Date.now());
+        if (!res.ok) throw new Error('Not found');
+        const raw = await res.text();
+        if (!raw.trim()) return false;
+        moods = decode(raw, CONFIG.password);
+        usingRemote = true;
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    function loadLocal() {
+      const raw = localStorage.getItem('moods');
+      if (raw) {
+        moods = decode(raw, CONFIG.password);
+      } else {
+        moods = [];
+      }
+      render();
+    }
+    function saveLocal() {
+      localStorage.setItem('moods', encode(moods, CONFIG.password));
+    }
+    async function init() {
+      const remoteOk = await loadFromRemote();
+      if (!remoteOk) {
+        setStatus('本地模式：请按 README 部署后启用云端同步', 'warn');
+      }
+      render();
+    }
+
+    // ============ 渲染 ============
+    function render() {
+      elUndo.disabled = moods.length === 0 || isUndoExpired(moods[0]);
+
+      if (moods.length === 0) {
+        elTimeline.innerHTML = '<div class="empty">暂无心情记录</div>';
+        return;
+      }
+      const byTimeDesc = moods.slice().sort((a, b) => new Date(b.t) - new Date(a.t));
+      elTimeline.innerHTML = byTimeDesc.map(m => {
+        const date = new Date(m.t);
+        const fmt = `${date.getFullYear()}/${pad(date.getMonth()+1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        const expired = isUndoExpired(m);
+        const isLatest = moods[0]?.id === m.id;
+        return `
+          <div class="mood-item">
+            <div class="dot" style="background:${isLatest ? (expired ? '#fdcb6e' : '#00b894') : '#6c5ce7'}"></div>
+            <div class="content">
+              <div class="meta">
+                <span class="time">${fmt}${isLatest && !expired ? ' · 可撤销' : ''}</span>
+                <span class="tag-badge">${m.tag}</span>
+              </div>
+              <p class="text">${escapeHtml(m.text)}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function isUndoExpired(m) {
+      if (!m) return true;
+      const then = new Date(m.t);
+      const now = new Date();
+      return (now - then) > 24 * 60 * 60 * 1000;
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
+    }
+
+    function setStatus(msg, type='') {
+      elStatus.textContent = msg;
+      elStatus.className = 'status' + (type ? ' ' + type : '');
+      clearTimeout(lastStatusTimeout);
+      lastStatusTimeout = setTimeout(() => {
+        elStatus.textContent = '';
+        elStatus.className = 'status';
+      }, 3000);
+    }
+
+    // ============ 发送与撤销提示 ============
+    let debounceTimer = null;
+    function openGuide(kind) {
+      alert(`请进入 GitHub 仓库 -> Actions -> Sync Mood Data -> Run workflow
+选择操作类型：${kind === 'send' ? 'send' : 'undo'}
+${kind === 'send' ? `填入内容与标签后运行\n\n临时已保存到本地，部署后可在 Actions 同步到云端。` : ''}`);
+    }
+    function send() {
+      const text = elInput.value.trim();
+      if (!text) {
+        setStatus('请输入心情内容', 'warn');
+        elInput.focus();
+        return;
+      }
+      if (sending) return;
+      sending = true;
+      elSend.disabled = true;
+
+      // 先存本地，再引导用户去 Actions 同步
+      const record = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+        t: new Date().toISOString(),
+        text,
+        tag: selectedTag
+      };
+      moods.unshift(record);
+      saveLocal();
+      render();
+      elInput.value = '';
+      sending = false;
+      elSend.disabled = false;
+      setStatus('本地已保存！请在仓库 Actions 中同步到云端', 'ok');
+      openGuide('send');
+    }
+
+    // ============ 撤销确认弹窗 ============
+    let pendingUndo = false;
+    function openUndoModal() {
+      if (moods.length === 0) return;
+      if (isUndoExpired(moods[0])) {
+        setStatus('已超过24小时，无法撤销', 'warn');
+        return;
+      }
+      pendingUndo = true;
+      elModal.classList.add('open');
+      elModalOk.focus();
+    }
+    function closeUndoModal() {
+      elModal.classList.remove('open');
+      pendingUndo = false;
+    }
+    function doUndo() {
+      if (!pendingUndo || moods.length === 0) return;
+      moods.shift();
+      saveLocal();
+      render();
+      closeUndoModal();
+      setStatus('本地已撤销！请在仓库 Actions 中同步到云端', 'ok');
+      openGuide('undo');
+    }
+
+    // ============ 事件绑定 ============
+    elTags.addEventListener('click', e => {
+      const tag = e.target.closest('.tag');
+      if (!tag) return;
+      selectedTag = tag.dataset.value;
+      elTags.querySelectorAll('.tag').forEach(t => t.classList.toggle('selected', t === tag));
+    });
+    elTags.querySelector('.tag').classList.add('selected');
+
+    elSend.addEventListener('click', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(send, 200);
+    });
+    elInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        elSend.click();
+      }
+    });
+
+    elUndo.addEventListener('click', openUndoModal);
+    elModalCancel.addEventListener('click', closeUndoModal);
+    elModalOk.addEventListener('click', doUndo);
+    elModal.addEventListener('click', e => {
+      if (e.target === elModal) closeUndoModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && elModal.classList.contains('open')) {
+        closeUndoModal();
+      }
+    });
+
+    // ============ 初始化 ============
+    init();
+  </script>
+</body>
+</html>
