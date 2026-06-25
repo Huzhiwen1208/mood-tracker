@@ -1,0 +1,6 @@
+click<9,>=8.1
+
+[dev]
+jinja2<4,>=3.1
+prompt_toolkit<4,>=3.0
+pytest<9,>=8

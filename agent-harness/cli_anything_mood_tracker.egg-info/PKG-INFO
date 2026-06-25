@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: cli-anything-mood-tracker
+Version: 1.0.0
+Summary: CLI-Anything harness for the mood-tracker GitHub Pages app
+Requires-Python: >=3.10
+Requires-Dist: click<9,>=8.1
+Provides-Extra: dev
+Requires-Dist: jinja2<4,>=3.1; extra == "dev"
+Requires-Dist: prompt_toolkit<4,>=3.0; extra == "dev"
+Requires-Dist: pytest<9,>=8; extra == "dev"
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

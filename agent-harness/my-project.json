@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "software": "mood-tracker",
+  "repo_root": "/Users/jackhu/Documents/Codex/2026-06-25/c/work/mood-tracker",
+  "backend_script": "/Users/jackhu/Documents/Codex/2026-06-25/c/work/mood-tracker/sync-data.js",
+  "data_file": "/Users/jackhu/Documents/Codex/2026-06-25/c/work/mood-tracker/data/moods.json",
+  "log_file": "/Users/jackhu/Documents/Codex/2026-06-25/c/work/mood-tracker/data/actions.log",
+  "password_env": "MOOD_PASSWORD",
+  "password": null,
+  "fallback_password": "test_123_for_mood",
+  "moods": [
+    {
+      "id": "mqt84n773yqdnrg8nx",
+      "t": "2026-06-25T08:12:03.571Z",
+      "text": "今天心情不错",
+      "tag": "😊"
+    },
+    {
+      "id": "mqrgctfcwsxb56io5w",
+      "t": "2026-06-24T02:26:49.464Z",
+      "text": "test act",
+      "tag": "😊"
+    }
+  ],
+  "last_refresh": "2026-06-25T08:21:14.274068+00:00",
+  "last_action": "undo",
+  "action_log_count": 4
+}

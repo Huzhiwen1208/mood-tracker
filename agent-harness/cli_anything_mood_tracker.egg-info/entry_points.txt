@@ -1,0 +1,2 @@
+[console_scripts]
+cli-anything-mood-tracker = cli_anything.mood_tracker.mood_tracker_cli:cli
